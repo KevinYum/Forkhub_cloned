@@ -288,11 +288,14 @@ public class LoginActivity extends RoboActionBarAccountAuthenticatorActivity {
     /**
      * Authenticate login & password
      */
-    public void handleLogin() {
+    private void handleLogin() {
         if (requestNewAccount)
             username = loginText.getText().toString();
         password = passwordText.getText().toString();
 
+        final AlertDialog dialog = AccountUtils.createLoginDialog(this, authenticationTask, "Logging in...");
+
+        /*
         final AlertDialog dialog = LightProgressDialog.create(this,
                 R.string.login_activity_authenticating);
         dialog.setCancelable(true);
@@ -305,13 +308,13 @@ public class LoginActivity extends RoboActionBarAccountAuthenticatorActivity {
             }
         });
         dialog.show();
+        */
 
         authenticationTask = new RoboAsyncTask<User>(this) {
 
             @Override
             public User call() throws Exception {
-                GitHubClient client = new TwoFactorAuthClient();
-                client.setCredentials(username, password);
+                    GitHubClient client = new LoginClient(username, password);
 
                 User user;
                 try {

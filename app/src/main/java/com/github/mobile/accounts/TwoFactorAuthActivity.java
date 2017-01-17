@@ -195,6 +195,8 @@ public class TwoFactorAuthActivity extends RoboActionBarActivity {
     private void handleLogin() {
         final String otpCode = otpCodeText.getText().toString();
 
+        final AlertDialog dialog = AccountUtils.createLoginDialog(this, authenticationTask, "Logging in...");
+        /*
         final AlertDialog dialog = LightProgressDialog.create(this,
                 R.string.login_activity_authenticating);
         dialog.setCancelable(true);
@@ -207,14 +209,13 @@ public class TwoFactorAuthActivity extends RoboActionBarActivity {
             }
         });
         dialog.show();
+        */
 
         authenticationTask = new RoboAsyncTask<User>(this) {
 
             @Override
             public User call() throws Exception {
-                TwoFactorAuthClient client = new TwoFactorAuthClient();
-                client.setCredentials(username, password);
-                client.setOtpCode(otpCode);
+                TwoFactorAuthClient client = new TwoFactorAuthClient(username, password, otpCode);
 
                 OAuthService service = new OAuthService(client);
                 String authToken = AccountAuthenticator.createAuthorization(service);

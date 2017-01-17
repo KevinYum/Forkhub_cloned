@@ -39,6 +39,7 @@ import android.util.Log;
 
 import com.github.mobile.R;
 import com.github.mobile.ui.LightAlertDialog;
+import com.github.mobile.ui.LightProgressDialog;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.RequestException;
+
+import roboguice.util.RoboAsyncTask;
 
 /**
  * Helpers for accessing {@link AccountManager}
@@ -350,5 +353,21 @@ public class AccountUtils {
             return true;
 
         return false;
+    }
+
+    public static AlertDialog createLoginDialog(final Context context, final RoboAsyncTask<User> loginTask, String message){
+        final AlertDialog dialog = LightProgressDialog.create(context,
+                message);
+        dialog.setCancelable(true);
+        dialog.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (loginTask != null)
+                    loginTask.cancel(true);
+            }
+        });
+        dialog.show();
+        return dialog;
     }
 }

@@ -16,7 +16,9 @@
 package com.github.mobile.accounts;
 
 import android.text.TextUtils;
+
 import com.github.mobile.DefaultClient;
+
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.GitHubResponse;
@@ -29,7 +31,7 @@ import java.net.HttpURLConnection;
  * {@link GitHubClient} extension that checks response headers to find
  * two-factor authentication related ones
  */
-public class TwoFactorAuthClient extends DefaultClient {
+public class LoginClient extends DefaultClient {
 
     /**
      * Two-factor authentication code header
@@ -48,10 +50,9 @@ public class TwoFactorAuthClient extends DefaultClient {
 
     private String otpCode;
 
-    public TwoFactorAuthClient(String username, String password, String code) {
+    public LoginClient(String username, String password) {
         super();
         setCredentials(username, password);
-        this.otpCode = code;
     }
 
     /**
@@ -59,7 +60,7 @@ public class TwoFactorAuthClient extends DefaultClient {
      *
      * @param request
      * @return response
-     * @throws java.io.IOException
+     * @throws IOException
      */
     @Override
     public GitHubResponse get(GitHubRequest request) throws IOException {
