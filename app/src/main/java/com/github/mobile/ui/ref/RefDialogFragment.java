@@ -35,6 +35,7 @@ import com.github.mobile.ui.DialogFragmentActivity;
 import com.github.mobile.ui.SingleChoiceDialogFragment;
 import com.github.mobile.util.TypefaceUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.eclipse.egit.github.core.Reference;
@@ -134,7 +135,7 @@ public class RefDialogFragment extends SingleChoiceDialogFragment {
             }
         });
 
-        ArrayList<Reference> choices = getChoices();
+        ArrayList<Serializable> choices = getChoices();
         int selected = arguments.getInt(ARG_SELECTED_CHOICE);
         RefListAdapter adapter = new RefListAdapter(inflater,
                 choices.toArray(new Reference[choices.size()]), selected);
@@ -146,23 +147,11 @@ public class RefDialogFragment extends SingleChoiceDialogFragment {
         return dialog;
     }
 
-    @SuppressWarnings("unchecked")
-    private ArrayList<Reference> getChoices() {
-        return (ArrayList<Reference>) getArguments().getSerializable(
-                ARG_CHOICES);
-    }
+
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
 
-        switch (which) {
-        case BUTTON_NEGATIVE:
-            break;
-        default:
-            getArguments().putSerializable(ARG_SELECTED,
-                    getChoices().get(which));
-            onResult(RESULT_OK);
-        }
     }
 }

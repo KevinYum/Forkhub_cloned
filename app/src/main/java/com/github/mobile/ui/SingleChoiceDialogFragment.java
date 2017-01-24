@@ -15,10 +15,18 @@
  */
 package com.github.mobile.ui;
 
+import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
+import org.eclipse.egit.github.core.Reference;
+
+import java.io.Serializable;
 import java.util.ArrayList;
+
+import static android.app.Activity.RESULT_OK;
+import static android.content.DialogInterface.BUTTON_NEGATIVE;
+import static android.content.DialogInterface.BUTTON_NEUTRAL;
 
 /**
  * Helper to display a single choice dialog
@@ -65,5 +73,29 @@ public class SingleChoiceDialogFragment extends DialogFragmentHelper implements
         arguments.putSerializable(ARG_CHOICES, choices);
         arguments.putInt(ARG_SELECTED_CHOICE, selectedChoice);
         show(activity, helper, arguments, TAG);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    protected ArrayList<Serializable> getChoices() {
+        return (ArrayList<Serializable>) getArguments().getSerializable(
+                ARG_CHOICES);
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which){
+        super.onClick(dialog, which);
+
+        switch (which) {
+            case BUTTON_NEGATIVE:
+                break;
+            case BUTTON_NEUTRAL:
+                onResult(RESULT_OK);
+                break;
+            default:
+                getArguments().putSerializable(ARG_SELECTED,
+                        getChoices().get(which));
+                onResult(RESULT_OK);
+        }
     }
 }

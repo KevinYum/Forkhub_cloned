@@ -36,6 +36,7 @@ import com.github.mobile.R;
 import com.github.mobile.ui.DialogFragmentActivity;
 import com.github.mobile.ui.SingleChoiceDialogFragment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.eclipse.egit.github.core.Milestone;
@@ -133,7 +134,7 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
             }
         });
 
-        ArrayList<Milestone> choices = getChoices();
+        ArrayList<Serializable> choices = getChoices();
         int selected = arguments.getInt(ARG_SELECTED_CHOICE);
         MilestoneListAdapter adapter = new MilestoneListAdapter(inflater,
                 choices.toArray(new Milestone[choices.size()]), selected);
@@ -145,26 +146,9 @@ public class MilestoneDialogFragment extends SingleChoiceDialogFragment {
         return dialog;
     }
 
-    @SuppressWarnings("unchecked")
-    private ArrayList<Milestone> getChoices() {
-        return (ArrayList<Milestone>) getArguments().getSerializable(
-                ARG_CHOICES);
-    }
-
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
 
-        switch (which) {
-        case BUTTON_NEGATIVE:
-            break;
-        case BUTTON_NEUTRAL:
-            onResult(RESULT_OK);
-            break;
-        default:
-            getArguments().putSerializable(ARG_SELECTED,
-                    getChoices().get(which));
-            onResult(RESULT_OK);
-        }
     }
 }

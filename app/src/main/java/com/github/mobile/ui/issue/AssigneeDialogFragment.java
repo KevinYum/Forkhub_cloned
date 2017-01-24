@@ -36,6 +36,7 @@ import com.github.mobile.ui.SingleChoiceDialogFragment;
 import com.github.mobile.util.AvatarLoader;
 import com.google.inject.Inject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.eclipse.egit.github.core.User;
@@ -131,7 +132,7 @@ public class AssigneeDialogFragment extends SingleChoiceDialogFragment {
             }
         });
 
-        ArrayList<User> choices = getChoices();
+        ArrayList<Serializable> choices = getChoices();
         int selected = arguments.getInt(ARG_SELECTED_CHOICE);
         UserListAdapter adapter = new UserListAdapter(inflater,
                 choices.toArray(new User[choices.size()]), selected, loader);
@@ -143,25 +144,8 @@ public class AssigneeDialogFragment extends SingleChoiceDialogFragment {
         return dialog;
     }
 
-    @SuppressWarnings("unchecked")
-    private ArrayList<User> getChoices() {
-        return (ArrayList<User>) getArguments().getSerializable(ARG_CHOICES);
-    }
-
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
-
-        switch (which) {
-        case BUTTON_NEGATIVE:
-            break;
-        case BUTTON_NEUTRAL:
-            onResult(RESULT_OK);
-            break;
-        default:
-            getArguments().putSerializable(ARG_SELECTED,
-                    getChoices().get(which));
-            onResult(RESULT_OK);
-        }
     }
 }

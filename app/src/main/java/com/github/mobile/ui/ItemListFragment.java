@@ -37,6 +37,7 @@ import com.github.kevinsawicki.wishlist.SingleTypeAdapter;
 import com.github.kevinsawicki.wishlist.ViewUtils;
 import com.github.mobile.R;
 import com.github.mobile.ThrowableLoader;
+import com.github.mobile.ui.roboactivities.RoboSupportFragment;
 import com.github.mobile.util.ToastUtils;
 
 import java.util.Collections;
@@ -48,7 +49,7 @@ import java.util.List;
  *
  * @param <E>
  */
-public abstract class ItemListFragment<E> extends DialogFragment implements
+public abstract class ItemListFragment<E> extends RoboSupportFragment implements
         LoaderCallbacks<List<E>>, SwipeRefreshLayout.OnRefreshListener {
 
     private static final String FORCE_REFRESH = "forceRefresh";
