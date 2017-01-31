@@ -41,36 +41,25 @@ public class IssueStore extends ItemStore {
 
     private final PullRequestService pullService;
 
-    /**
-     * Create issue store
-     *
-     * @param issueService
-     * @param pullService
-     */
+    // command
     public IssueStore(final IssueService issueService,
             final PullRequestService pullService) {
         this.issueService = issueService;
         this.pullService = pullService;
     }
 
-    /**
-     * Get issue
-     *
-     * @param repository
-     * @param number
-     * @return issue or null if not in store
-     */
-    public RepositoryIssue getIssue(IRepositoryIdProvider repository, int number) {
-        ItemReferences<RepositoryIssue> repoIssues = repos.get(repository.generateId());
+
+    // basic query
+    // @requires: repository != null
+    public RepositoryIssue getIssue(IRepositoryIdProvider repository,
+                                    int number) {
+        ItemReferences<RepositoryIssue> repoIssues
+                = repos.get(repository.generateId());
         return repoIssues != null ? repoIssues.get(number) : null;
     }
 
-    /**
-     * Add issue to store
-     *
-     * @param issue
-     * @return issue
-     */
+
+    // qeury & command
     public RepositoryIssue addIssue(Issue issue) {
         IRepositoryIdProvider repo = null;
         if (issue instanceof RepositoryIssue)
@@ -79,6 +68,18 @@ public class IssueStore extends ItemStore {
             repo = RepositoryId.createFromUrl(issue.getHtmlUrl());
         return addIssue(repo, issue);
     }
+    /** command
+     * @requires: issue != null
+     public void addIssue(Issue issue) {
+        IRepositoryIdProvider repo = null;
+        if (issue instanceof RepositoryIssue)
+        repo = ((RepositoryIssue) issue).getRepository();
+        if (repo == null)
+        repo = RepositoryId.createFromUrl(issue.getHtmlUrl());
+        addIssue(repo, issue);
+     }
+      * */
+
 
     /**
      * Add issue to store
@@ -87,6 +88,8 @@ public class IssueStore extends ItemStore {
      * @param issue
      * @return issue
      */
+
+    // query & command & defensive checking
     public RepositoryIssue addIssue(IRepositoryIdProvider repository, Issue issue) {
         issue.setBodyHtml(HtmlUtils.format(issue.getBodyHtml()).toString());
         RepositoryIssue current = getIssue(repository, issue.getNumber());
@@ -105,6 +108,22 @@ public class IssueStore extends ItemStore {
         }
     }
 
+    /** command
+     * requires: {repository != null, issue != null,
+     *            getIssue(repository, issue.getNumber())==null}
+    public void addIssue(IRepositoryIdProvider repository, Issue issue) {
+        issue.setBodyHtml(HtmlUtils.format(issue.getBodyHtml()).toString());
+        String repoId = repository.generateId();
+        ItemReferences<RepositoryIssue> repoIssues = repos.get(repoId);
+        if (repoIssues == null) {
+            repoIssues = new ItemReferences<RepositoryIssue>();
+            repos.put(repoId, repoIssues);
+        }
+        RepositoryIssue repoIssue = createRepositoryIssue(issue);
+        repoIssues.put(issue.getNumber(), repoIssue);
+    }
+     * */
+
     /**
      * Refresh issue
      *
@@ -113,6 +132,7 @@ public class IssueStore extends ItemStore {
      * @return refreshed issue
      * @throws IOException
      */
+    //  query & command
     public RepositoryIssue refreshIssue(IRepositoryIdProvider repository, int number)
             throws IOException {
         Issue issue;
@@ -132,6 +152,13 @@ public class IssueStore extends ItemStore {
         }
         return addIssue(repository, issue);
     }
+    /** command
+     * requires: repository != null
+     public void refreshIssue(IRepositoryIdProvider repository, int number)
+            throws IOException {
+        ...
+    }
+     */
 
     /**
      * Edit issue
@@ -141,11 +168,20 @@ public class IssueStore extends ItemStore {
      * @return edited issue
      * @throws IOException
      */
+    // query & command
     public RepositoryIssue editIssue(IRepositoryIdProvider repository, Issue issue)
             throws IOException {
         return addIssue(repository, issueService.editIssue(repository, issue));
     }
+    /** command
+     * requires: {repository != null, issue != null}
+     public void editIssue(IRepositoryIdProvider repository, Issue issue)
+            throws IOException {
+        addIssue(repository, issueService.editIssue(repository, issue));
+     }
+     */
 
+    // basic query
     private RepositoryIssue createRepositoryIssue(Issue issue) {
         if (issue instanceof RepositoryIssue)
             return (RepositoryIssue) issue;
@@ -153,6 +189,8 @@ public class IssueStore extends ItemStore {
         return copyIssue(new RepositoryIssue(), issue);
     }
 
+    // basic query
+    // @requires: {to != null, from != null}
     private RepositoryIssue copyIssue(RepositoryIssue to, Issue from) {
         to.setId(from.getId());
         to.setUser(from.getUser());
