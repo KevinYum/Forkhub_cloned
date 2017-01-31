@@ -314,7 +314,7 @@ public class LoginActivity extends RoboActionBarAccountAuthenticatorActivity {
 
             @Override
             public User call() throws Exception {
-                    GitHubClient client = new LoginClient(username, password);
+                GitHubClient client = new LoginClient(username, password);
 
                 User user;
                 try {
@@ -327,6 +327,11 @@ public class LoginActivity extends RoboActionBarAccountAuthenticatorActivity {
                     return null;
                 }
 
+                setAccountMng(user);
+                return user;
+            }
+
+            private void setAccountMng(User user) throws Exception{
                 Account account = new Account(user.getLogin(), ACCOUNT_TYPE);
                 if (requestNewAccount) {
                     accountManager
@@ -340,7 +345,6 @@ public class LoginActivity extends RoboActionBarAccountAuthenticatorActivity {
                 } else
                     accountManager.setPassword(account, password);
 
-                return user;
             }
 
             @Override
