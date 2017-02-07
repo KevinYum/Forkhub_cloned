@@ -21,7 +21,7 @@ import android.util.Log;
 
 import com.github.mobile.accounts.AuthenticatedUserTask;
 import com.github.mobile.util.HtmlUtils;
-import com.github.mobile.util.HttpImageGetter;
+import com.github.mobile.util.IEncoder;
 import com.google.inject.Inject;
 
 import java.util.Collections;
@@ -36,27 +36,10 @@ import org.eclipse.egit.github.core.service.GistService;
  */
 public class RefreshGistTask extends AuthenticatedUserTask<FullGist> {
 
-    private static final String TAG = "RefreshGistTask";
+    private final IEncoder imageGetter;
 
-    @Inject
-    private GistStore store;
-
-    @Inject
-    private GistService service;
-
-    private final String id;
-
-    private final HttpImageGetter imageGetter;
-
-    /**
-     * Create task to refresh the given {@link Gist}
-     *
-     * @param context
-     * @param gistId
-     * @param imageGetter
-     */
     public RefreshGistTask(Context context, String gistId,
-            HttpImageGetter imageGetter) {
+                           IEncoder imageGetter) {
         super(context);
 
         id = gistId;
@@ -79,6 +62,19 @@ public class RefreshGistTask extends AuthenticatedUserTask<FullGist> {
         }
         return new FullGist(gist, service.isStarred(id), comments);
     }
+
+    private static final String TAG = "RefreshGistTask";
+
+    @Inject
+    private GistStore store;
+
+    @Inject
+    private GistService service;
+
+    private final String id;
+
+
+
 
     @Override
     protected void onException(Exception e) throws RuntimeException {

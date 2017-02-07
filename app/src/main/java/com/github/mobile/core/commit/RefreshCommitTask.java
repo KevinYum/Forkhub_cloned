@@ -37,10 +37,10 @@ import org.eclipse.egit.github.core.service.CommitService;
  */
 public class RefreshCommitTask extends AuthenticatedUserTask<FullCommit> {
 
-    private static final String TAG = "RefreshCommitTask";
-
     @Inject
-    private CommitStore store;
+    private ICommitStore store;
+
+    private static final String TAG = "RefreshCommitTask";
 
     @Inject
     private CommitService service;

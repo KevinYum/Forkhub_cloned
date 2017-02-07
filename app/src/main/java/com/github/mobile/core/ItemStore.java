@@ -42,11 +42,6 @@ public abstract class ItemStore {
         }
     }
 
-    /**
-     * Generic reference store
-     *
-     * @param <V>
-     */
     protected static class ItemReferences<V> {
 
         private final ReferenceQueue<V> queue;

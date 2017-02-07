@@ -25,9 +25,16 @@ import org.eclipse.egit.github.core.RepositoryCommit;
  */
 public abstract class CommitPager extends ResourcePager<RepositoryCommit> {
 
+    private final ICommitStore store;
+
+    public CommitPager(final IRepositoryIdProvider repository,
+                       final ICommitStore store) {
+        this.repository = repository;
+        this.store = store;
+    }
+
     private final IRepositoryIdProvider repository;
 
-    private final CommitStore store;
 
     /**
      * Create pager
@@ -35,11 +42,7 @@ public abstract class CommitPager extends ResourcePager<RepositoryCommit> {
      * @param repository
      * @param store
      */
-    public CommitPager(final IRepositoryIdProvider repository,
-            final CommitStore store) {
-        this.repository = repository;
-        this.store = store;
-    }
+
 
     @Override
     protected Object getId(final RepositoryCommit resource) {

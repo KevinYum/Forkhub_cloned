@@ -37,7 +37,7 @@ import com.github.mobile.R;
 import com.github.mobile.ThrowableLoader;
 import com.github.mobile.core.ResourcePager;
 import com.github.mobile.core.commit.CommitPager;
-import com.github.mobile.core.commit.CommitStore;
+import com.github.mobile.core.commit.ICommitStore;
 import com.github.mobile.core.ref.RefUtils;
 import com.github.mobile.ui.DialogFragmentActivity;
 import com.github.mobile.ui.DialogResultListener;
@@ -66,6 +66,46 @@ import org.eclipse.egit.github.core.service.RepositoryService;
 public class CommitListFragment extends PagedItemFragment<RepositoryCommit>
         implements DialogResultListener {
 
+    @Inject
+    private ICommitStore store;
+
+    @Override
+    protected ResourcePager<RepositoryCommit> createPager() {
+        return new CommitPager(repository, store) {
+
+            private String last;
+
+            @Override
+            protected RepositoryCommit register(RepositoryCommit resource) {
+                // Store first parent of last commit registered for next page
+                // lookup
+                List<Commit> parents = resource.getParents();
+                if (parents != null && !parents.isEmpty())
+                    last = parents.get(0).getSha();
+                else
+                    last = null;
+
+                return super.register(resource);
+            }
+
+            @Override
+            public PageIterator<RepositoryCommit> createIterator(int page,
+                                                                 int size) {
+                if (page > 1 || ref == null)
+                    return service.pageCommits(repository, last, null, size);
+                else
+                    return service.pageCommits(repository, ref, null, size);
+            }
+
+            @Override
+            public ResourcePager<RepositoryCommit> clear() {
+                last = null;
+                return super.clear();
+            }
+        };
+    }
+
+
     /**
      * Avatar loader
      */
@@ -75,8 +115,6 @@ public class CommitListFragment extends PagedItemFragment<RepositoryCommit>
     @Inject
     private CommitService service;
 
-    @Inject
-    private CommitStore store;
 
     private Repository repository;
 
@@ -142,41 +180,6 @@ public class CommitListFragment extends PagedItemFragment<RepositoryCommit>
             updateRefLabel();
     }
 
-    @Override
-    protected ResourcePager<RepositoryCommit> createPager() {
-        return new CommitPager(repository, store) {
-
-            private String last;
-
-            @Override
-            protected RepositoryCommit register(RepositoryCommit resource) {
-                // Store first parent of last commit registered for next page
-                // lookup
-                List<Commit> parents = resource.getParents();
-                if (parents != null && !parents.isEmpty())
-                    last = parents.get(0).getSha();
-                else
-                    last = null;
-
-                return super.register(resource);
-            }
-
-            @Override
-            public PageIterator<RepositoryCommit> createIterator(int page,
-                    int size) {
-                if (page > 1 || ref == null)
-                    return service.pageCommits(repository, last, null, size);
-                else
-                    return service.pageCommits(repository, ref, null, size);
-            }
-
-            @Override
-            public ResourcePager<RepositoryCommit> clear() {
-                last = null;
-                return super.clear();
-            }
-        };
-    }
 
     @Override
     protected int getLoadingMessage() {

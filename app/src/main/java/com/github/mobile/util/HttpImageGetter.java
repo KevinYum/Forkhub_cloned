@@ -51,7 +51,104 @@ import okhttp3.Response;
 /**
  * Getter for an image
  */
-public class HttpImageGetter implements ImageGetter {
+public class HttpImageGetter implements ImageGetter, IEncoder {
+
+    /**
+     * Encode given HTML string and map it to the given id
+     */
+    @Override
+    public void encode(final Object id, final String html) {
+        if (TextUtils.isEmpty(html))
+            return;
+
+        CharSequence encoded = HtmlUtils.encode(html, loading);
+        // Use default encoding if no img tags
+        if (containsImages(html)) {
+            CharSequence currentEncoded = rawHtmlCache.put(id, encoded);
+            // Remove full html if raw html has changed
+            if (currentEncoded == null
+                    || !currentEncoded.toString().equals(encoded.toString()))
+                fullHtmlCache.remove(id);
+        } else {
+            rawHtmlCache.remove(id);
+            fullHtmlCache.put(id, encoded);
+        }
+        return;
+    }
+
+    /**
+     * Bind text view to HTML string
+     */
+    public HttpImageGetter bind(final TextView view, final String html,
+                                final Object id) {
+        if (TextUtils.isEmpty(html))
+            return hide(view);
+
+        CharSequence encoded = fullHtmlCache.get(id);
+        if (encoded != null)
+            return show(view, encoded);
+
+        encoded = rawHtmlCache.get(id);
+        if (encoded == null) {
+            encoded = HtmlUtils.encode(html, loading);
+            if (containsImages(html))
+                rawHtmlCache.put(id, encoded);
+            else {
+                rawHtmlCache.remove(id);
+                fullHtmlCache.put(id, encoded);
+                return show(view, encoded);
+            }
+        }
+
+        if (TextUtils.isEmpty(encoded))
+            return hide(view);
+
+        show(view, encoded);
+        view.setTag(id);
+        new AuthenticatedUserTask<CharSequence>(context) {
+
+            @Override
+            protected CharSequence run(Account account) throws Exception {
+                return HtmlUtils.encode(html, HttpImageGetter.this);
+            }
+
+            @Override
+            protected void onSuccess(final CharSequence html) throws Exception {
+                fullHtmlCache.put(id, html);
+
+                if (id.equals(view.getTag()))
+                    show(view, html);
+            }
+        }.execute();
+        return this;
+    }
+
+    @Override
+    public Drawable getDrawable(final String source) {
+        try {
+            Drawable repositoryImage = requestRepositoryImage(source);
+            if (repositoryImage != null)
+                return repositoryImage;
+        } catch (Exception e) {
+            // Ignore and attempt request over regular HTTP request
+        }
+
+        try {
+            Request request = new Request.Builder().url(source).build();
+            OkHttpClient client = new OkHttpClient();
+            Response response = client.newCall(request).execute();
+
+            Bitmap bitmap = ImageUtils.getBitmap(response.body().bytes(), width, MAX_VALUE);
+            if (bitmap == null)
+                return loading.getDrawable(source);
+            BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
+            drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            return drawable;
+        } catch (IOException e) {
+            return loading.getDrawable(source);
+        }
+    }
+
 
     private static class LoadingImageGetter implements ImageGetter {
 
@@ -116,83 +213,8 @@ public class HttpImageGetter implements ImageGetter {
         return this;
     }
 
-    /**
-     * Encode given HTML string and map it to the given id
-     *
-     * @param id
-     * @param html
-     * @return this image getter
-     */
-    public HttpImageGetter encode(final Object id, final String html) {
-        if (TextUtils.isEmpty(html))
-            return this;
 
-        CharSequence encoded = HtmlUtils.encode(html, loading);
-        // Use default encoding if no img tags
-        if (containsImages(html)) {
-            CharSequence currentEncoded = rawHtmlCache.put(id, encoded);
-            // Remove full html if raw html has changed
-            if (currentEncoded == null
-                    || !currentEncoded.toString().equals(encoded.toString()))
-                fullHtmlCache.remove(id);
-        } else {
-            rawHtmlCache.remove(id);
-            fullHtmlCache.put(id, encoded);
-        }
-        return this;
-    }
 
-    /**
-     * Bind text view to HTML string
-     *
-     * @param view
-     * @param html
-     * @param id
-     * @return this image getter
-     */
-    public HttpImageGetter bind(final TextView view, final String html,
-            final Object id) {
-        if (TextUtils.isEmpty(html))
-            return hide(view);
-
-        CharSequence encoded = fullHtmlCache.get(id);
-        if (encoded != null)
-            return show(view, encoded);
-
-        encoded = rawHtmlCache.get(id);
-        if (encoded == null) {
-            encoded = HtmlUtils.encode(html, loading);
-            if (containsImages(html))
-                rawHtmlCache.put(id, encoded);
-            else {
-                rawHtmlCache.remove(id);
-                fullHtmlCache.put(id, encoded);
-                return show(view, encoded);
-            }
-        }
-
-        if (TextUtils.isEmpty(encoded))
-            return hide(view);
-
-        show(view, encoded);
-        view.setTag(id);
-        new AuthenticatedUserTask<CharSequence>(context) {
-
-            @Override
-            protected CharSequence run(Account account) throws Exception {
-                return HtmlUtils.encode(html, HttpImageGetter.this);
-            }
-
-            @Override
-            protected void onSuccess(final CharSequence html) throws Exception {
-                fullHtmlCache.put(id, html);
-
-                if (id.equals(view.getTag()))
-                    show(view, html);
-            }
-        }.execute();
-        return this;
-    }
 
     /**
      * Request an image using the contents API if the source URI is a path to a
@@ -258,29 +280,4 @@ public class HttpImageGetter implements ImageGetter {
             return null;
     }
 
-    @Override
-    public Drawable getDrawable(final String source) {
-        try {
-            Drawable repositoryImage = requestRepositoryImage(source);
-            if (repositoryImage != null)
-                return repositoryImage;
-        } catch (Exception e) {
-            // Ignore and attempt request over regular HTTP request
-        }
-
-        try {
-            Request request = new Request.Builder().url(source).build();
-            OkHttpClient client = new OkHttpClient();
-            Response response = client.newCall(request).execute();
-
-            Bitmap bitmap = ImageUtils.getBitmap(response.body().bytes(), width, MAX_VALUE);
-            if (bitmap == null)
-                return loading.getDrawable(source);
-            BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-            drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            return drawable;
-        } catch (IOException e) {
-            return loading.getDrawable(source);
-        }
-    }
 }

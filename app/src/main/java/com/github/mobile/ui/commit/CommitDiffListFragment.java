@@ -49,10 +49,10 @@ import android.widget.Toast;
 import com.github.kevinsawicki.wishlist.ViewFinder;
 import com.github.kevinsawicki.wishlist.ViewUtils;
 import com.github.mobile.R;
-import com.github.mobile.core.commit.CommitStore;
 import com.github.mobile.core.commit.CommitUtils;
 import com.github.mobile.core.commit.FullCommit;
 import com.github.mobile.core.commit.FullCommitFile;
+import com.github.mobile.core.commit.ICommitStore;
 import com.github.mobile.core.commit.RefreshCommitTask;
 import com.github.mobile.ui.DialogFragment;
 import com.github.mobile.ui.HeaderFooterListAdapter;
@@ -80,6 +80,9 @@ import org.eclipse.egit.github.core.RepositoryCommit;
 public class CommitDiffListFragment extends DialogFragment implements
         OnItemClickListener {
 
+    @Inject
+    private ICommitStore store;
+
     private DiffStyler diffStyler;
 
     private ListView list;
@@ -98,9 +101,6 @@ public class CommitDiffListFragment extends DialogFragment implements
 
     @Inject
     private AvatarLoader avatars;
-
-    @Inject
-    private CommitStore store;
 
     private View loadingView;
 

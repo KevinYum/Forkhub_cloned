@@ -23,6 +23,7 @@ import com.github.mobile.accounts.GitHubAccount;
 import com.github.mobile.api.DateAdapter;
 import com.github.mobile.api.RequestConfiguration;
 import com.github.mobile.core.commit.CommitStore;
+import com.github.mobile.core.commit.ICommitStore;
 import com.github.mobile.core.gist.GistStore;
 import com.github.mobile.core.issue.IssueStore;
 import com.github.mobile.persistence.OrganizationRepositories;
@@ -53,11 +54,22 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
  */
 public class GitHubModule extends AbstractModule {
 
+    private WeakReference<ICommitStore> commits;
+
+    @Provides
+    ICommitStore commitStore(CommitService service) {
+        ICommitStore store = commits != null ? commits.get() : null;
+        if (store == null) {
+            store = new CommitStore(service);
+            commits = new WeakReference<ICommitStore>(store);
+        }
+        return store;
+    }
+
+
     private WeakReference<IssueStore> issues;
 
     private WeakReference<GistStore> gists;
-
-    private WeakReference<CommitStore> commits;
 
     @Override
     protected void configure() {
@@ -118,13 +130,5 @@ public class GitHubModule extends AbstractModule {
         return store;
     }
 
-    @Provides
-    CommitStore commitStore(CommitService service) {
-        CommitStore store = commits != null ? commits.get() : null;
-        if (store == null) {
-            store = new CommitStore(service);
-            commits = new WeakReference<CommitStore>(store);
-        }
-        return store;
-    }
+
 }

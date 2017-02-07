@@ -28,28 +28,9 @@ import org.eclipse.egit.github.core.service.CommitService;
 /**
  * Store of commits
  */
-public class CommitStore extends ItemStore {
+public class CommitStore extends ItemStore implements ICommitStore {
 
-    private final Map<String, ItemReferences<RepositoryCommit>> commits = new HashMap<String, ItemReferences<RepositoryCommit>>();
-
-    private final CommitService service;
-
-    /**
-     * Create commit store
-     *
-     * @param service
-     */
-    public CommitStore(final CommitService service) {
-        this.service = service;
-    }
-
-    /**
-     * Get commit
-     *
-     * @param repo
-     * @param id
-     * @return commit or null if not in store
-     */
+    @Override
     public RepositoryCommit getCommit(final IRepositoryIdProvider repo,
             final String id) {
         final ItemReferences<RepositoryCommit> repoCommits = commits.get(repo
@@ -57,13 +38,7 @@ public class CommitStore extends ItemStore {
         return repoCommits != null ? repoCommits.get(id) : null;
     }
 
-    /**
-     * Add commit to store
-     *
-     * @param repo
-     * @param commit
-     * @return commit
-     */
+    @Override
     public RepositoryCommit addCommit(IRepositoryIdProvider repo,
             RepositoryCommit commit) {
         RepositoryCommit current = getCommit(repo, commit.getSha());
@@ -89,16 +64,19 @@ public class CommitStore extends ItemStore {
         }
     }
 
-    /**
-     * Refresh commit
-     *
-     * @param repo
-     * @param id
-     * @return refreshed commit
-     * @throws IOException
-     */
+    @Override
     public RepositoryCommit refreshCommit(final IRepositoryIdProvider repo,
             final String id) throws IOException {
         return addCommit(repo, service.getCommit(repo, id));
     }
+
+    private final Map<String, ItemReferences<RepositoryCommit>> commits = new HashMap<String, ItemReferences<RepositoryCommit>>();
+
+    private final CommitService service;
+
+    public CommitStore(final CommitService service) {
+        this.service = service;
+    }
+
+
 }
