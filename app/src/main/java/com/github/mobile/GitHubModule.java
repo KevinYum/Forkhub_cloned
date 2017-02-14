@@ -22,6 +22,7 @@ import com.github.mobile.accounts.AccountScope;
 import com.github.mobile.accounts.GitHubAccount;
 import com.github.mobile.api.DateAdapter;
 import com.github.mobile.api.RequestConfiguration;
+import com.github.mobile.core.StoreFactory;
 import com.github.mobile.core.commit.CommitStore;
 import com.github.mobile.core.commit.ICommitStore;
 import com.github.mobile.core.gist.GistStore;
@@ -53,23 +54,41 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
  * Main module provide services and clients
  */
 public class GitHubModule extends AbstractModule {
-
     private WeakReference<ICommitStore> commits;
+    private WeakReference<IssueStore> issues;
+    private WeakReference<GistStore> gists;
 
     @Provides
     ICommitStore commitStore(CommitService service) {
         ICommitStore store = commits != null ? commits.get() : null;
         if (store == null) {
-            store = new CommitStore(service);
+            store = StoreFactory.createCommitStore(service);
             commits = new WeakReference<ICommitStore>(store);
         }
         return store;
     }
 
+    @Provides
+    IssueStore issueStore(IssueService issueService,
+                          PullRequestService pullService) {
+        IssueStore store = issues != null ? issues.get() : null;
+        if (store == null) {
+            store = StoreFactory.createIssueStore(issueService, pullService);
+            issues = new WeakReference<IssueStore>(store);
+        }
+        return store;
+    }
 
-    private WeakReference<IssueStore> issues;
+    @Provides
+    GistStore gistStore(GistService service) {
+        GistStore store = gists != null ? gists.get() : null;
+        if (store == null) {
+            store = StoreFactory.createGistStore(service);
+            gists = new WeakReference<GistStore>(store);
+        }
+        return store;
+    }
 
-    private WeakReference<GistStore> gists;
 
     @Override
     protected void configure() {
@@ -109,26 +128,7 @@ public class GitHubModule extends AbstractModule {
         return new File(context.getFilesDir(), "cache");
     }
 
-    @Provides
-    IssueStore issueStore(IssueService issueService,
-            PullRequestService pullService) {
-        IssueStore store = issues != null ? issues.get() : null;
-        if (store == null) {
-            store = new IssueStore(issueService, pullService);
-            issues = new WeakReference<IssueStore>(store);
-        }
-        return store;
-    }
 
-    @Provides
-    GistStore gistStore(GistService service) {
-        GistStore store = gists != null ? gists.get() : null;
-        if (store == null) {
-            store = new GistStore(service);
-            gists = new WeakReference<GistStore>(store);
-        }
-        return store;
-    }
 
 
 }
