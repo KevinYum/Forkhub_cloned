@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.github.mobile.R;
 import com.github.mobile.ui.FragmentPagerAdapter;
 
+import org.eclipse.egit.github.core.Comment;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
 
 /**
@@ -37,6 +38,7 @@ public class CommentPreviewPagerAdapter extends FragmentPagerAdapter {
 
     private final Resources resources;
 
+    private CommentBuilder cbuilder;
     /**
      * Text to populate comment window.
      */
@@ -56,13 +58,17 @@ public class CommentPreviewPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(final int position) {
+        cbuilder = new CommentBuilder();
         switch (position) {
         case 0:
-            textFragment = new RawCommentFragment();
-            textFragment.setText(initComment);
+            textFragment = cbuilder.rcf(initComment);
+            //textFragment.setText(initComment);
+            //textFragment = new RawCommentFragment();
+            //textFragment.setText(initComment);
             return textFragment;
         case 1:
-            htmlFragment = new RenderedCommentFragment();
+            htmlFragment = cbuilder.rencf();
+            //htmlFragment = new RenderedCommentFragment();
             return htmlFragment;
         default:
             return null;
