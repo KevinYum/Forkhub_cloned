@@ -4,12 +4,16 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.github.mobile.R;
+import com.github.mobile.util.AvatarLoader;
 import com.google.inject.Key;
+
+import org.eclipse.egit.github.core.User;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +40,10 @@ import roboguice.util.RoboContext;
  * Based on <a href="https://github.com/mccrajs">@mccrajs's</a> implementation <a href="https://github.com/metova/roboguice-appcompat/blob/master/src/com/metova/roboguice/appcompat/RoboActionBarActivity.java">here</a>.
  */
 public class RoboActionBarActivity extends AppCompatActivity implements RoboContext {
+
+    public User user;
+    public ActionBar actionBar;
+    public AvatarLoader avatar;
 
     protected EventManager eventManager;
     protected HashMap<Key<?>, Object> scopedObjects = new HashMap<>();

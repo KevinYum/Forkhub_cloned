@@ -36,6 +36,7 @@ import android.widget.ProgressBar;
 import com.github.kevinsawicki.wishlist.ViewUtils;
 import com.github.mobile.Intents.Builder;
 import com.github.mobile.R;
+import com.github.mobile.aspectJ.AvatarBind;
 import com.github.mobile.core.code.RefreshBlobTask;
 import com.github.mobile.core.commit.CommitUtils;
 import com.github.mobile.ui.BaseActivity;
@@ -138,6 +139,10 @@ public class BranchFileViewActivity extends BaseActivity implements
         avatars.bind(actionBar, repo.getOwner());
 
         loadContent();
+
+        //avatar = avatars;
+        //this.actionBar = actionBar;
+        //this.user = repo.getOwner();
     }
 
     @Override
