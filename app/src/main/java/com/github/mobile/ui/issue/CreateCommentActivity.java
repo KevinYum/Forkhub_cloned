@@ -26,6 +26,7 @@ import android.support.v7.app.ActionBar;
 
 import com.github.mobile.Intents.Builder;
 import com.github.mobile.R;
+import com.github.mobile.aspectJ.AvatarBind;
 import com.github.mobile.core.issue.CreateCommentTask;
 import com.github.mobile.core.issue.EditCommentTask;
 import com.github.mobile.ui.comment.CommentPreviewPagerAdapter;
@@ -80,6 +81,7 @@ public class CreateCommentActivity extends
     private Comment comment;
 
     @Override
+    @AvatarBind
     protected void onCreate(Bundle savedInstanceState) {
         issueNumber = getIntExtra(EXTRA_ISSUE_NUMBER);
         comment = getSerializableExtra(EXTRA_COMMENT);
@@ -92,7 +94,11 @@ public class CreateCommentActivity extends
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(getString(R.string.issue_title) + issueNumber);
         actionBar.setSubtitle(repositoryId.generateId());
-        avatars.bind(actionBar, (User) getSerializableExtra(EXTRA_USER));
+        //avatars.bind(actionBar, (User) getSerializableExtra(EXTRA_USER));
+
+        avatar = avatars;
+        this.actionBar = actionBar;
+        this.user = (User) getSerializableExtra(EXTRA_USER);
     }
 
     @Override

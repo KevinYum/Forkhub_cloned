@@ -114,6 +114,7 @@ public class BranchFileViewActivity extends BaseActivity implements
     private HttpImageGetter imageGetter;
 
     @Override
+    @AvatarBind
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -136,13 +137,13 @@ public class BranchFileViewActivity extends BaseActivity implements
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(file);
         actionBar.setSubtitle(branch);
-        avatars.bind(actionBar, repo.getOwner());
+        //avatars.bind(actionBar, repo.getOwner());
 
         loadContent();
 
-        //avatar = avatars;
-        //this.actionBar = actionBar;
-        //this.user = repo.getOwner();
+        avatar = avatars;
+        this.actionBar = actionBar;
+        this.user = repo.getOwner();
     }
 
     @Override
