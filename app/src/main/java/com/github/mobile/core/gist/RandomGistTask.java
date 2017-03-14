@@ -51,9 +51,6 @@ public class RandomGistTask extends ProgressDialogTask<Gist> {
      *
      * @param context
      */
-    public RandomGistTask(final Activity context) {
-        super(context);
-    }
 
     /**
      * Execute the task with a progress dialog displaying.
@@ -66,25 +63,61 @@ public class RandomGistTask extends ProgressDialogTask<Gist> {
         execute();
     }
 
+    public RandomGistTask(final Activity context) {
+        super(context);
+    }
+
+    public RandomGistTask policy(Policy _policy){
+        this._policy = _policy;
+        return this;
+    }
+
+    public RandomGistTask pageSize(int _pageSize){
+        this._pageSize = _pageSize;
+        return this;
+    }
+
+    public RandomGistTask repeatIt(int _repeatIt){
+        this._repeatIt = _repeatIt;
+        return this;
+    }
+
+
+    public enum Policy {
+        RANDOM, SEQUENTIAL
+    }
+
+    private Policy _policy = Policy.RANDOM;
+    private int lastPage = 0;
+    private int _pageSize = 1;
+    private int _repeatIt = 1;
+
     @Override
     protected Gist run(Account account) throws Exception {
         PageIterator<Gist> pages = service.pagePublicGists(1);
         pages.next();
-        int randomPage = 1 + (int) (Math.random() * ((pages.getLastPage() - 1) + 1));
 
-        Collection<Gist> gists = service.pagePublicGists(randomPage, 1).next();
-
-        // Make at least two tries since page numbers are volatile
-        if (gists.isEmpty()) {
-            randomPage = 1 + (int) (Math.random() * ((pages.getLastPage() - 1) + 1));
-            gists = service.pagePublicGists(randomPage, 1).next();
+        if (_policy==Policy.RANDOM){
+            for (int i=0;i<_repeatIt;++i){
+                int randomPage = 1 + (int) (Math.random() * ((pages.getLastPage() - 1) + 1));
+                Collection<Gist> gists = service.pagePublicGists(randomPage, _pageSize).next();
+                if (!gists.isEmpty())
+                    return store.addGist(gists.iterator().next());
+            }
+        }
+        else {
+            for (int i=0;i<_repeatIt;++i){
+                lastPage += 1;
+                if (lastPage==pages.getLastPage())
+                    lastPage = 1;
+                Collection<Gist> gists = service.pagePublicGists(lastPage, _pageSize).next();
+                if (!gists.isEmpty())
+                    return store.addGist(gists.iterator().next());
+            }
         }
 
-        if (gists.isEmpty())
-            throw new IllegalArgumentException(getContext().getString(
+        throw new IllegalArgumentException(getContext().getString(
                     R.string.no_gists_found));
-
-        return store.addGist(gists.iterator().next());
     }
 
     @Override

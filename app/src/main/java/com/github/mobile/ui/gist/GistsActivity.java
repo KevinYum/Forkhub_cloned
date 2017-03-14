@@ -29,6 +29,8 @@ import com.github.mobile.ui.TabPagerActivity;
 import com.github.mobile.ui.user.HomeActivity;
 import com.github.mobile.util.TypefaceUtils;
 
+import com.github.mobile.core.gist.RandomGistTask.Policy;
+
 /**
  * Activity to display view pagers of different Gist queries
  */
@@ -46,7 +48,8 @@ public class GistsActivity extends TabPagerActivity<GistQueriesPagerAdapter> {
     }
 
     private void randomGist() {
-        new RandomGistTask(this).start();
+        //new RandomGistTask(this).start();
+        new RandomGistTask(this).policy(Policy.RANDOM).pageSize(1).repeatIt(2).start();
     }
 
     @Override
